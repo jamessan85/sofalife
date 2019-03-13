@@ -39,14 +39,13 @@ async function getClearence() {
         const text = $('.rangeProduct').text();
         for (sofa in sofas) {
             const search = text.search(sofa)
-            if (search) {
-                const createMail = setMail(sofa)
+            if (search >= 0) {
+                const createMail = setMail(sofas[sofa])
                 const info = await transporter.sendMail(createMail)
-                console.log(info)
             }
         }
     } catch (e) {
-        console.log(e)
+        console.error(e)
     }
     
 }
