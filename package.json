@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "deploy": "gcloud app deploy",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,7 +15,7 @@
     "express": "^4.16.4",
     "node": "^11.11.0",
     "nodemailer": "^5.1.1",
-    "puppeteer": "^1.13.0",
+    "puppeteer": "^1.2.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7"
   }

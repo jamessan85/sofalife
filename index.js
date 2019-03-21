@@ -2,15 +2,14 @@ const express = require('express')
 const app = express();
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
-const rp = require("request-promise-native");
 const nodemailer = require("nodemailer");
 
-const sofas = ["/zinc/i","/quartz/i", "/power/i"];
+const sofas = ["/zinc/i","/quartz/i"];
 
 function setMail(sofa) {
     const mailoptions = {
         from: 'sofa@sandmandesign.co.uk',
-        to: "jamessandersoon@gmail.com",
+        to: ["jamessandersoon@gmail.com", "mikesanderson85@gmail.com"],
         subject: `Your sofa ${sofa} is in the clearence`,
         body: "It's in the clearence"
     }
@@ -20,7 +19,7 @@ function setMail(sofa) {
 
 const transporter = nodemailer.createTransport({
     host: "smtp.123-reg.co.uk",
-    port: 25,
+    port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
         user: "james@sandmandesign.co.uk",
@@ -30,7 +29,7 @@ const transporter = nodemailer.createTransport({
 
 async function getClearence() {
     try {
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({args: ['--no-sandbox']});
         const page = await browser.newPage();
         await page.goto('https://www.dfs.co.uk/clearance/all-clearance/q/sort/live_prod_uk_products/', {waitUntil: 'networkidle2'});
         const html = await page.evaluate(() => document.body.innerHTML)
@@ -44,15 +43,34 @@ async function getClearence() {
                 const info = await transporter.sendMail(createMail)
             }
         }
+        return true
     } catch (e) {
-        console.error(e)
+        throw e
     }
     
 }
 
+app.get('/sofaprices', async function (req, res){
+    try {
+        const result = await getClearence();
+        if (result) {
+            res.sendStatus(200) 
+        }
+    } catch (e) {
+        console.log(e);
+    }
+    
+})
 
-getClearence();
+app.get('/', (req, res) => {
+  res
+    .status(200)
+    .send('Hello, world!')
+    .end();
+});
 
-app.listen(8000, () => {
-  console.log('Sofa app listening on port 8000!')
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`);
+  console.log('Press Ctrl+C to quit.');
 });

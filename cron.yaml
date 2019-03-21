@@ -1,0 +1,4 @@
+cron:
+- description: "daily sofa check"
+  url: /sofaprices
+  schedule: every 24 hours
