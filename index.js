@@ -16,7 +16,6 @@ function setMail(sofa) {
     return mailoptions
 }
 
-
 const transporter = nodemailer.createTransport({
     host: "smtp.123-reg.co.uk",
     port: 587,
@@ -47,13 +46,32 @@ async function getClearence() {
     } catch (e) {
         throw e
     }
-    
+}
+
+async function getWheels() {
+    try {
+        const browser = await puppeteer.launch({args: ['--no-sandbox']});
+        const page = await browser.newPage();
+        await page.goto('https://www.wiggle.co.uk/campagnolo-bullet-50-carbon-clincher-wheelset/', {waitUntil: 'networkidle2'});
+        const html = await page.evaluate(() => document.body.innerHTML)
+        await browser.close();
+        const $ = cheerio.load(html);
+        const text = $('.js-unit-price').text().replace(/ /g, "").trim().slice(1, 4);
+        if (text <= 600) {
+            const createMail = setMail("Campag bullets")
+            const info = await transporter.sendMail(createMail)
+        }
+        return true
+    } catch (e) {
+        throw e
+    }
 }
 
 app.get('/sofaprices', async function (req, res){
     try {
-        const result = await getClearence();
-        if (result) {
+        const sofas = await getClearence();
+        const wheels = await getWheels()
+        if (sofas + wheels == 2) {
             res.sendStatus(200) 
         }
     } catch (e) {
@@ -70,6 +88,7 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 8080;
+
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
   console.log('Press Ctrl+C to quit.');
